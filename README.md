@@ -10,3 +10,6 @@ This repository consists of a Crate workspace holding two folders intended to sh
 1) Clone this repo with `git clone https://www.github.com/joshua-mo-143/minitrace.git`.
 
 That's pretty much it. Once you've cloned it, you can basically do whatever.
+
+## License
+MIT
