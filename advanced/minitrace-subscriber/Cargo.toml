@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-minitrace-core = { path = "../minitrace-core" }
+core = { package = "minitrace-core", path = "../minitrace-core" }
