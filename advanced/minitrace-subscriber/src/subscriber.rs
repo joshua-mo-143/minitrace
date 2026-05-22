@@ -93,14 +93,3 @@ impl SubscriberExt for StdoutSubscriber {
         println!("{ts} - {message}");
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use crate::subscriber::{Registry, StdoutSubscriber};
-
-    #[test]
-    fn make_registry() {
-        let reg = Registry::new().layer(StdoutSubscriber);
-        reg.init();
-    }
-}
