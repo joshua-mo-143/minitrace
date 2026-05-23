@@ -1,8 +1,8 @@
 use crate::subscriber::REGISTRY;
 
 pub struct Event {
-    pub(crate) timestamp: u64,
-    pub(crate) message: Option<String>,
+    pub timestamp: u64,
+    pub message: Option<String>,
 }
 
 impl Event {
@@ -20,6 +20,12 @@ impl Event {
 pub struct EventBuilder {
     timestamp: Option<u64>,
     message: Option<String>,
+}
+
+impl Default for EventBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl EventBuilder {

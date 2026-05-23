@@ -5,23 +5,37 @@ static SPAN_REGISTRY: OnceLock<Mutex<Vec<Span>>> = OnceLock::new();
 #[derive(Clone)]
 pub struct Span {
     name: String,
+    enabled: bool,
 }
 
 impl Span {
     pub fn new(name: impl Into<String>) -> Self {
-        Self { name: name.into() }
+        Self {
+            name: name.into(),
+            enabled: true,
+        }
     }
 
     pub fn name(&self) -> &str {
         &self.name
     }
 
-    pub fn enter(self) -> Spanguard {
-        let name = self.name.clone();
+    pub fn disabled() -> Self {
+        Self {
+            name: String::new(),
+            enabled: false,
+        }
+    }
+
+    pub fn enter<'a>(self) -> Spanguard<'a> {
+        if !self.enabled {
+            return Spanguard { enabled: &false };
+        }
+
         let registry = SPAN_REGISTRY.get_or_init(|| Mutex::new(Vec::new()));
         registry.lock().unwrap().push(self);
 
-        Spanguard { name }
+        Spanguard { enabled: &true }
     }
 
     pub fn in_scope<F, T>(&self, f: F) -> T
@@ -34,17 +48,17 @@ impl Span {
     }
 }
 
-pub struct Spanguard {
-    name: String,
+pub struct Spanguard<'a> {
+    enabled: &'a bool,
 }
 
-impl Spanguard {
-    pub fn name(&self) -> &str {
-        &self.name
+impl<'a> Spanguard<'a> {
+    pub fn enabled(&self) -> &bool {
+        &self.enabled
     }
 }
 
-impl Drop for Spanguard {
+impl<'a> Drop for Spanguard<'a> {
     fn drop(&mut self) {
         let registry = SPAN_REGISTRY.get_or_init(|| Mutex::new(Vec::new()));
         registry.lock().unwrap().pop();
