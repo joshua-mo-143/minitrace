@@ -1,17 +1,21 @@
 use std::sync::{Mutex, OnceLock};
 
+use crate::field::Field;
+
 static SPAN_REGISTRY: OnceLock<Mutex<Vec<Span>>> = OnceLock::new();
 
 #[derive(Clone)]
 pub struct Span {
     name: String,
+    fields: Vec<Field>,
     enabled: bool,
 }
 
 impl Span {
-    pub fn new(name: impl Into<String>) -> Self {
+    pub fn new(name: impl Into<String>, fields: Vec<Field>) -> Self {
         Self {
             name: name.into(),
+            fields,
             enabled: true,
         }
     }
@@ -23,6 +27,7 @@ impl Span {
     pub fn disabled() -> Self {
         Self {
             name: String::new(),
+            fields: Vec::new(),
             enabled: false,
         }
     }
