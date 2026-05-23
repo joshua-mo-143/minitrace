@@ -8,32 +8,40 @@ pub fn span(item: TokenStream) -> TokenStream {
     let span_name = args.name;
     let line = args.line;
     let col = args.col;
+
     let field_names = args.fields.iter().map(|field| {
         let name = field.name.to_string();
         syn::LitStr::new(&name, field.name.span())
     });
+
     let field_values = args.fields.iter().map(|field| {
         let name = field.name.to_string();
         let name = syn::LitStr::new(&name, field.name.span());
         let value = &field.val.0;
         quote! {
-            (#name, &#value)
+            ::minitrace_core::field::Field::new(
+                #name,
+                ::std::format!("{:?}", &(#value))
+            )
         }
     });
+
     let span_name_for_runtime = match &span_name {
         Some(name) => quote! { #name },
         None => quote! { module_path!() },
     };
+
     let span_name_for_metadata = match &span_name {
         Some(name) => quote! { Some(#name) },
         None => quote! { None },
     };
+
     quote! {{
-        static CALLSITE: ::std::sync::OnceLock<::minitrace_core::callsite::Callsite> =
-            ::std::sync::OnceLock::new();
+        static CALLSITE: std::sync::OnceLock<minitrace_core::callsite::Callsite> =
+            std::sync::OnceLock::new();
         let callsite = CALLSITE.get_or_init(|| {
-            ::minitrace_core::callsite::Callsite::register(
-                ::minitrace_core::metadata::Metadata {
+            minitrace_core::callsite::Callsite::register(
+                minitrace_core::metadata::Metadata {
                     name: #span_name_for_metadata,
                     fields: &[#(#field_names),*],
                     file: file!(),
@@ -44,14 +52,15 @@ pub fn span(item: TokenStream) -> TokenStream {
                 }
             )
         });
-        if ::minitrace_core::subscriber::REGISTRY
+
+        if minitrace_core::subscriber::REGISTRY
             .get()
             .is_some_and(|registry| registry.enabled(callsite.metadata()))
         {
-            let _fields = [#(#field_values),*];
-            ::minitrace_core::span::Span::new(#span_name_for_runtime)
+            let fields = [#(#field_values),*];
+            minitrace_core::span::Span::new(#span_name_for_runtime, fields)
         } else {
-            ::minitrace_core::span::Span::disabled()
+            minitrace_core::span::Span::disabled()
         }
     }}
     .into()
