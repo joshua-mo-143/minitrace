@@ -1,5 +1,5 @@
 [package]
-name = "minitrace-subsccriber"
+name = "minitrace-subscriber"
 version = "0.1.0"
 edition = "2024"
 
