@@ -99,4 +99,8 @@ where
         self.inner.on_record_event(event);
         self.outer.on_record_event(event);
     }
+
+    fn enabled(&self, metadata: &Metadata) -> bool {
+        self.inner.enabled(metadata) || self.outer.enabled(metadata)
+    }
 }

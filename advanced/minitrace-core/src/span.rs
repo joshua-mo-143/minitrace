@@ -60,8 +60,10 @@ impl<'a> Spanguard<'a> {
 
 impl<'a> Drop for Spanguard<'a> {
     fn drop(&mut self) {
-        let registry = SPAN_REGISTRY.get_or_init(|| Mutex::new(Vec::new()));
-        registry.lock().unwrap().pop();
+        if *self.enabled() {
+            let registry = SPAN_REGISTRY.get_or_init(|| Mutex::new(Vec::new()));
+            registry.lock().unwrap().pop();
+        }
     }
 }
 
